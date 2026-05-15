@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Dispositivo {
+  id                     Int       @id @default(autoincrement())
+  empresa_id             Int
+  nome_modelo            String    @db.VarChar(255)
+  token_dispositivo_hash String    @db.VarChar(255)
+  ativo                  Boolean   @default(true)
+  created_at             DateTime  @default(now())
+
+  sensores  Sensor[]
+  atuadores Atuador[]
+  alertas   Alerta[]
+  logs      Log[]
+
+  @@index([empresa_id])
+  @@index([ativo])
+  @@map("dispositivos")
+}
+
+model Sensor {
+  id             Int       @id @default(autoincrement())
+  dispositivo_id Int
+  nome_modelo    String    @db.VarChar(255)
+  tipo_sensor    String    @db.VarChar(100)
+  unidade        String    @db.VarChar(50)
+  ativo          Boolean   @default(true)
+  created_at     DateTime  @default(now())
+
+  dispositivo Dispositivo @relation(fields: [dispositivo_id], references: [id])
+  alertas     Alerta[]
+
+  @@index([dispositivo_id])
+  @@index([ativo])
+  @@map("sensores")
+}
+
+model Atuador {
+  id             Int       @id @default(autoincrement())
+  dispositivo_id Int
+  nome_modelo    String    @db.VarChar(255)
+  tipo           String    @db.VarChar(100)
+  ativo          Boolean   @default(true)
+  created_at     DateTime  @default(now())
+
+  dispositivo Dispositivo @relation(fields: [dispositivo_id], references: [id])
+
+  @@index([dispositivo_id])
+  @@index([ativo])
+  @@map("atuadores")
+}
+
+model Alerta {
+  id             Int       @id @default(autoincrement())
+  dispositivo_id Int
+  sensor_id      Int
+  tipo           String    @db.VarChar(100)
+  mensagem       String    @db.VarChar(500)
+  created_at     DateTime  @default(now())
+
+  dispositivo Dispositivo @relation(fields: [dispositivo_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  sensor      Sensor      @relation(fields: [sensor_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([dispositivo_id])
+  @@index([sensor_id])
+  @@map("alertas")
+}
+
+model Log {
+  id               Int       @id @default(autoincrement())
+  tabela           String    @db.VarChar(100)
+  operacao         String    @db.VarChar(50)
+  descricao        String    @db.Text
+  created_at       DateTime  @default(now())
+  dispositivo_nome String?    @db.VarChar(255)
+  dispositivo_id   Int?
+  empresa_id       Int
+
+  dispositivo Dispositivo? @relation(fields: [dispositivo_id], references: [id])
+
+  @@index([empresa_id])
+  @@index([dispositivo_id])
+  @@index([created_at])
+  @@map("logs")
+}
