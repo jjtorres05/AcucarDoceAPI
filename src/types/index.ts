@@ -1,50 +1,54 @@
-//jwt vem de ConectaAPI
-export interface jwtPayload{
-    id: number;
-    tipo:string;
-    rolInterno: string;
-    empresa_id: number;
-    rol_empresa: string;
+// JWT - Claims que vienen de ConectaAPI
+export interface JwtPayload {
+  id: number;            // usuario_id
+  empresa_id: number;    // empresa a la que pertenece
 }
 
-//contextos de autentificacao
-export interface AuthContext{
+// Contextos de autenticación
+export interface AuthContext {
     usuario_id: number;
     empresa_id: number;
-    tipo: string;
-    rolInterno: string;
-    rolExterno: string;
 }
 
-export interface DeviceContext{
+export interface DeviceContext {
     dispositivo_id: number;
     empresa_id: number;
 }
 
-//Respostas da API
-export interface ApiResponse<T= unknown>{
+// respostas da API
+export interface ApiResponse<T = unknown> {
     success: boolean;
     data?: T;
     error?: string;
-    message?: string
+    message?: string;
 }
 
-export interface PaginatedResponse<T>{
+export interface PaginatedResponse<T> {
     items: T[];
     total: number;
     page: number;
     limit: number;
 }
 
-//DTOs
 
-export interface DispositivoResponse{
+// DTOs de Dispositivo
+export interface DispositivoResponse {
     id: string;
     nome_modelo: string;
     ativo: boolean;
     created_at: Date;
 }
 
-export interface DispositivoCreateResponse extends DispositivoResponse{
+export interface DispositivoCreateResponse extends DispositivoResponse {
     token_dispositivo: string;
+}
+
+//Log
+export interface LogDescricao {
+    acao: string;
+    entidade: string;
+    registroId: number;
+    executadoPor: number;
+    dados?: Record<string, unknown>;
+    alteracoes?: Record<string, { antes: unknown; depois: unknown }>;
 }

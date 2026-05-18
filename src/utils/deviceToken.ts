@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import bcrypt from "bcrypt";
-
+//crypt js
 const SALT_ROUNDS = 12;
 const TOKEN_BYTES = 32;
 

@@ -35,3 +35,9 @@ export class ConflictError extends AppError {
     }
 }
 
+export class NotFoundError extends AppError {
+    constructor(message= "Recurso nao encontrado"){
+        super(404, message);
+        this.name= "NotFoundError";
+    }
+}
