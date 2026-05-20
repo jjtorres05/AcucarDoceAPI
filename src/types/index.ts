@@ -63,3 +63,13 @@ export interface SensorResponse {
     ativo: boolean;
     created_at: Date;
 }
+
+//Dto de atuador
+export interface AtuadorResponse {
+    id: string;
+    dispositivo_id: string;
+    nome_modelo: string;
+    tipo: string;
+    ativo: boolean;
+    created_at: Date;
+}

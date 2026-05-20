@@ -14,6 +14,7 @@ const safeSelect={
     created_at: true,
 }as const;
 export const sensorRepository={
+
     findByIdAndEmpresa: (id: number, empresa_id: number)=>
         getPrismaClient().sensor.findFirst({
             where: {id, dispositivo:{empresa_id},},select:safeSelect,
@@ -25,12 +26,14 @@ export const sensorRepository={
             select: safeSelect,
             orderBy: {created_at:"desc"},
         }),
+
     findAllByEmpresa: (empresa_id: number)=>
         getPrismaClient().sensor.findMany({
             where: {dispositivo: {empresa_id}},
             select: safeSelect,
             orderBy: {created_at: "desc"},
         }),
+
     create: (
         data:{
             dispositivo_id: number;
@@ -80,7 +83,7 @@ export const sensorRepository={
                 where: {id, dispositivo:{empresa_id}}, select: safeSelect,
             });
             if(!antes) throw new Error("Dispositivo nao encontrado");
-            const sensor = await tx.dispositivo.update({
+            const sensor = await tx.sensor.update({
                 where: {id}, data, select: safeSelect,
             });
             const alteracoes = calcularAlteracoes(antes, sensor, data);
@@ -131,6 +134,5 @@ export const sensorRepository={
                     }),
                 },
             });
-        })
-    
-}
+        }),  
+};

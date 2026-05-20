@@ -4,7 +4,6 @@ import { obfuscateId, deobfuscateId } from "../utils/obfuscateId";
 import { NotFoundError } from "../utils/errors";
 import { AuthContext,SensorResponse } from "../types";
 import { criarSensorInput,atualizarSensorInput } from "../schemas/sensorSchema";
-import { de } from "zod/v4/locales";
 
 function toResponse(s:{
     id: number,
@@ -103,7 +102,7 @@ export const sensorService={
         obfuscatedId: string
     ): Promise<void> =>{
         const id=deobfuscateId("sensor",obfuscatedId);
-        const sensor = await sensorRepository.deactivate(
+        await sensorRepository.deactivate(
             id,
             auth.empresa_id,
             auth.usuario_id,

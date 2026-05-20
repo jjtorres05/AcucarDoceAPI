@@ -15,7 +15,7 @@ export const sensorHandler={
 
             const input = await parseAndValidate(request, criarSensorSchema);
             const result = await sensorService.criar(auth,input);
-            return created(result,"Sensor cirado com sucesso");
+            return created(result,"Sensor criado com sucesso");
         }catch (erro){
             return handleError(erro);
         }
