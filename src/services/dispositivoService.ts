@@ -40,18 +40,10 @@ export const dispositivoService = {
         };
     },
 
-    listar: async(
-        auth: AuthContext,
-        page: number,
-        limit: number,
-    ): Promise<PaginatedResponse<DispositivoResponse>> => {
-        const [items, total] = await Promise.all([dispositivoRepository.findAllByEmpresa(auth.empresa_id,page,limit),dispositivoRepository.countByEmpresa(auth.empresa_id),]);
-        return {
-            items: items.map(toResponse),
-            total,
-            page,
-            limit,
-        };
+    listar: async(auth: AuthContext):
+    Promise<DispositivoResponse[]>=>{
+        const items= await dispositivoRepository.findAllByEmpresa(auth.empresa_id);
+        return items.map(toResponse);
     },
     
     obTerPorId: async(

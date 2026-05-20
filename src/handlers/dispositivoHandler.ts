@@ -27,9 +27,7 @@ export const dispositivoHandler ={
     Promise<HttpResponseInit> => {
         try{
             const auth = extractAuthContext(request);
-            const page = Math.max(1,parseInt(request.query.get("page")?? "1",10)||1);
-            const limit= Math.min(100,Math.max(1,parseInt(request.query.get("limit")??"20",10)||20));
-            const result = await dispositivoService.listar(auth,page,limit);
+            const result = await dispositivoService.listar(auth);
             return ok(result);
         }catch (erro){
             return handleError(erro);

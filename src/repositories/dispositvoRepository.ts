@@ -14,14 +14,13 @@ export const dispositivoRepository={
             where:{id,empresa_id}, select: safeSelect,
         }),
 
-    findAllByEmpresa:(empresa_id:number, page: number,limit: number)=>{
-        const skip= (page-1) * limit;
-        return getPrismaClient().dispositivo.findMany({
+    findAllByEmpresa:(empresa_id:number)=>
+        getPrismaClient().dispositivo.findMany({
             where: {empresa_id},
             select: safeSelect,
-            orderBy: {created_at:"desc"}, skip,take: limit,
-        });
-    },
+            orderBy: {created_at:"desc"},
+        }),
+    
 
     countByEmpresa: (empresa_id: number)=>
         getPrismaClient().dispositivo.count({

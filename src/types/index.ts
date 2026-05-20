@@ -52,3 +52,14 @@ export interface LogDescricao {
     dados?: Record<string, unknown>;
     alteracoes?: Record<string, { antes: unknown; depois: unknown }>;
 }
+
+//Dto de sensor
+export interface SensorResponse {
+    id: string;
+    dispositivo_id: string;
+    nome_modelo: string;
+    tipo_sensor: string;
+    unidade: string;
+    ativo: boolean;
+    created_at: Date;
+}
