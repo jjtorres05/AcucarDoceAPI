@@ -4,6 +4,6 @@ import { dispositivoHandler } from "../../handlers/dispositivoHandler"
 app.http("regenerarTokenDispositivo",{
     methods: ["POST"],
     authLevel: "anonymous",
-    route: "dispositivos/{id}/regenerar-token",
+    route: "empresa/{empresaId}/dispositivos/{id}/regenerar-token",
     handler: dispositivoHandler.regenerarToken,
 });

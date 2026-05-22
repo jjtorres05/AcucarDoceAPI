@@ -5,6 +5,7 @@ export const criarDispositivoSchema = z.object({
 });
 
 export const atualizarDispositivoSchema = z.object({
+    id: z.string().min(1,"id, é obrigatori"),
     nome_modelo: z.string().min(1, "nome modelo nao pode ser vazio").max(255, "nome_modelo deve ter no maximo 255 caracteres").optional(),
     ativo: z.boolean().optional(),
 });

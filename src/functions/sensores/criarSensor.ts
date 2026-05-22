@@ -4,6 +4,6 @@ import { sensorHandler } from "../../handlers/sensorHandler";
 app.http("criarSensor", {
     methods: ["POST"],
     authLevel: "anonymous",
-    route: "sensores",
+    route: "empresa/{empresaId}/sensores",
     handler: sensorHandler.criar,
 });

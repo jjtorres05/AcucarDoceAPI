@@ -1,5 +1,6 @@
 import { getPrismaClient } from "../database/prismaClient";
 import { calcularAlteracoes,montarDescricaoLog } from "../utils/logHelper";
+import { NotFoundError } from "../utils/errors";
 const safeSelect ={
     id: true,
     empresa_id: true,
@@ -80,7 +81,7 @@ export const dispositivoRepository={
             const antes= await tx.dispositivo.findFirst({
                 where: {id, empresa_id}, select: safeSelect,
             });
-            if(!antes) throw new Error("Dispositivo nao encontrado");
+            if(!antes) throw new NotFoundError("Dispositivo nao encontrado");
             const dispositivo = await tx.dispositivo.update({
                 where: {id}, data, select: safeSelect,
             });
@@ -111,7 +112,7 @@ export const dispositivoRepository={
                 select: safeSelect,
             });
 
-            if(!antes) throw new Error("Dispositivo nao encontrado");
+            if(!antes) throw new NotFoundError("Dispositivo nao encontrado");
             const dispositivo = await tx.dispositivo.update({
                 where: {id},
                 data: {ativo: false},
@@ -147,7 +148,7 @@ export const dispositivoRepository={
             const dispositivo = await tx.dispositivo.findFirst({
                 where: {id, empresa_id}, select: safeSelect,
             });
-            if(!dispositivo) throw new Error("Dispositivo nao encontrado");
+            if(!dispositivo) throw new NotFoundError("Dispositivo nao encontrado");
             
             await tx.dispositivo.update({
                 where: {id}, data: {token_dispositivo_hash},

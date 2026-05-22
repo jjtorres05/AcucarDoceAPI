@@ -73,3 +73,25 @@ export interface AtuadorResponse {
     ativo: boolean;
     created_at: Date;
 }
+
+//Dto de alerta
+export interface AlertaResponse {
+    id: string;
+    dispositivo_id: string;
+    sensor_id: string;
+    tipo: string;
+    mensagem: string;
+    created_at: Date;
+}
+
+//Dto log
+export interface LogResponse {
+    id: string;
+    tabela: string;
+    operacao: string;
+    descricao: string;
+    dispositivo_id: string | null;
+    dispositivo_nome: string | null;
+    empresa_id: number;
+    created_at: Date;
+}

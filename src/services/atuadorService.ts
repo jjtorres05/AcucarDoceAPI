@@ -79,14 +79,14 @@ export const atuadorService={
 
     atualizar: async(
         auth: AuthContext,
-        obfuscatedId: string,
         input: atualizarSensorInput
     ): Promise<AtuadorResponse> => {
-        const id= deobfuscateId("atuador",obfuscatedId);
+        const id= deobfuscateId("atuador",input.id);
+        const {id:_,...data}= input;
         const atuador= await atuadorRepository.update(
             id,
             auth.empresa_id,
-            input,
+            data,
             auth.usuario_id
         )
         if(!atuador){

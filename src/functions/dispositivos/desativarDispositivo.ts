@@ -4,6 +4,6 @@ import { dispositivoHandler } from "../../handlers/dispositivoHandler"
 app.http("desativarDispositivo",{
     methods: ["PATCH"],
     authLevel: "anonymous",
-    route: "dispositivos/{id}/desativar",
+    route: "empresa/{empresaId}/dispositivos/{id}/desativar",
     handler: dispositivoHandler.desativar,
 });

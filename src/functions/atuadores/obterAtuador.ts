@@ -4,6 +4,6 @@ import { atuadorHandler } from "../../handlers/atuadorHandler";
 app.http("obterAtuador", {
     methods: ["GET"],
     authLevel: "anonymous",
-    route: "atuadores/{id}",
+    route: "empresa/{empresaId}/atuadores/{id}",
     handler: atuadorHandler.obterPorId,
 });

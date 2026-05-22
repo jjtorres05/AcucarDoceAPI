@@ -7,6 +7,7 @@ export const criarAtuadorSchema = z.object({
 });
 
 export const atualizarAtuadorSchema = z.object({
+    id: z.string().min(1,"id é obrigatorio"),
     nome_modelo: z.string().min(1,"nome modelo obrigatorio").max(255, "nome_modelo deve ter no maximo 255 caracteres").optional(),
     tipo: z.string().min (1,"tipo de sensor obrigatorio").max(100,"tipo_sensor deve ter no maximo 100 caracteres").optional(),
     ativo: z.boolean().optional(),

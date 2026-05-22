@@ -4,6 +4,6 @@ import { atuadorHandler } from "../../handlers/atuadorHandler";
 app.http("desativarAtuador", {
     methods: ["PATCH"],
     authLevel: "anonymous",
-    route: "atuadores/{id}/desativar",
+    route: "empresa/{empresaId}/atuadores/{id}/desativar",
     handler: atuadorHandler.desativar,
 });

@@ -81,14 +81,14 @@ export const sensorService={
 
     atualizar: async(
         auth: AuthContext,
-        obfuscatedId: string,
         input: atualizarSensorInput
     ): Promise<SensorResponse> => {
-        const id= deobfuscateId("sensor",obfuscatedId);
+        const id= deobfuscateId("sensor",input.id);
+        const {id:_,...data}= input;
         const sensor= await sensorRepository.update(
             id,
             auth.empresa_id,
-            input,
+            data,
             auth.usuario_id
         );
         if(!sensor){

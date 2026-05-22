@@ -1,7 +1,7 @@
-import { tr } from "zod/v4/locales";
 import { getPrismaClient } from "../database/prismaClient";
 import { calcularAlteracoes, montarDescricaoLog } from "../utils/logHelper";
-import { get } from "http";
+import { NotFoundError } from "../utils/errors";
+
 const safeSelect={
     id: true,
     dispositivo_id: true,
@@ -75,7 +75,7 @@ export const atuadorRepository = {
                 where: {id, dispositivo:{empresa_id}}, select: safeSelect,
             });
             if(!antes){
-                throw new Error("Atuador noa encontrado");
+                throw new NotFoundError("Atuador noa encontrado");
             }
             const atuador= await tx.atuador.update({
                 where: {id}, data, select: safeSelect,
@@ -105,7 +105,7 @@ export const atuadorRepository = {
             const antes = await tx.atuador.findFirst({
                 where: {id, dispositivo:{empresa_id}},select: safeSelect,
             });
-            if(!antes) throw new Error("Atuador nao encontrado");
+            if(!antes) throw new NotFoundError("Atuador nao encontrado");
             const atuador = await tx.atuador.update({
                 where:{id}, data: {ativo: false}, select: safeSelect,
             });

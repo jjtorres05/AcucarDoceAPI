@@ -1,8 +1,6 @@
-import { id } from "zod/v4/locales";
 import { getPrismaClient } from "../database/prismaClient";
 import { calcularAlteracoes, montarDescricaoLog } from "../utils/logHelper";
-import { create } from "node:domain";
-import { date } from "zod/v4";
+import { NotFoundError } from "../utils/errors";
 
 const safeSelect={
     id: true,
@@ -82,7 +80,7 @@ export const sensorRepository={
             const antes= await tx.sensor.findFirst({
                 where: {id, dispositivo:{empresa_id}}, select: safeSelect,
             });
-            if(!antes) throw new Error("Dispositivo nao encontrado");
+            if(!antes) throw new NotFoundError("Dispositivo nao encontrado");
             const sensor = await tx.sensor.update({
                 where: {id}, data, select: safeSelect,
             });
@@ -111,7 +109,7 @@ export const sensorRepository={
                 where: {id, dispositivo:{empresa_id}},
                 select: safeSelect,
             });
-            if(!antes) throw new Error("Sensor nao encontrado");
+            if(!antes) throw new NotFoundError("Sensor nao encontrado");
             const sensor = await tx.sensor.update({
                 where:{id},
                 data: {ativo: false},

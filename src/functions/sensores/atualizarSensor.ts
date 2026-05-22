@@ -4,6 +4,6 @@ import { sensorHandler } from "../../handlers/sensorHandler";
 app.http("atualizarSensor", {
     methods: ["PUT"],
     authLevel: "anonymous",
-    route: "sensores/{id}",
+    route: "empresa/{empresaId}/sensores",
     handler: sensorHandler.atualizar,
 }); 

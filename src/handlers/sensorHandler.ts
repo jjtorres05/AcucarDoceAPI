@@ -68,13 +68,9 @@ export const sensorHandler={
             const auth= extractAuthContext(request);
             const token= extractToken(request);
             await checkPermission(token,auth.empresa_id,"sensor","atualizar");
-            const id = request.params.id;
-            if(!id){
-                return handleError(new Error("Para Id faltando"));
-            }
 
             const input = await parseAndValidate(request, atualizarSensorSchema);
-            const result = await sensorService.atualizar(auth,id,input);
+            const result = await sensorService.atualizar(auth,input);
             return ok(result, "Sensor atualizado com sucesso");
         }catch (erro){
             return handleError(erro);

@@ -71,12 +71,8 @@ export const atuadorHandler={
             const auth= extractAuthContext(request);
             const token= extractToken(request);
             await checkPermission(token,auth.empresa_id,"atuador","atualizar");
-            const id= request.params.id;
-            if(!id){
-                return handleError(new Error("parametro Id faltando"));
-            }
             const input= await parseAndValidate(request,atualizarAtuadorSchema);
-            const result= await atuadorService.atualizar(auth,id,input);
+            const result= await atuadorService.atualizar(auth,input);
             return ok(result,"Atuador atualizado com sucesso");
         }catch (erro){
             return handleError(erro);

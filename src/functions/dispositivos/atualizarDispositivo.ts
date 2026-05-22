@@ -4,6 +4,6 @@ import { dispositivoHandler } from "../../handlers/dispositivoHandler"
 app.http("atualizarDispositivo",{
     methods: ["PUT"],
     authLevel: "anonymous",
-    route: "dispositivos/{id}",
+    route: "empresa/{empresaId}/dispositivos",
     handler: dispositivoHandler.atualizar,
 });

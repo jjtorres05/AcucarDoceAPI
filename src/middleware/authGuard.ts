@@ -26,13 +26,22 @@ export function extractAuthContext(request: HttpRequest): AuthContext {
     }
 
     const token = authHeader.substring(7);
+    const empresaIdParam= request.params.empresaId;
+    if(!empresaIdParam){
+        throw new UnauthorizedError("Parametro empresaId ausente na rota");
+    }
+
+    const empresa_id = parseInt(empresaIdParam, 10);
+    if (isNaN(empresa_id)) {
+        throw new UnauthorizedError("empresaId invalido");
+    }
 
     try {
         const decoded = jwt.verify(token, getJwtSecret()) as JwtPayload;
 
         return {
-        usuario_id: decoded.id,
-        empresa_id: decoded.empresa_id,
+            usuario_id: decoded.id,
+            empresa_id,
         };
     } catch {
         throw new UnauthorizedError("Token inválido ou expirado");

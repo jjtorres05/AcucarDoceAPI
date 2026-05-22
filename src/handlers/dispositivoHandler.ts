@@ -53,12 +53,8 @@ export const dispositivoHandler ={
             const auth= extractAuthContext(request);
             const token= extractToken(request);
             await checkPermission(token, auth.empresa_id,"dispositivo","atualizar");
-            const id = request.params.id;
-            if(!id){
-                return handleError(new Error("Parametro id ausente"));
-            }
             const input= await parseAndValidate(request,atualizarDispositivoSchema);
-            const result = await dispositivoService.atualizar(auth,id,input);
+            const result = await dispositivoService.atualizar(auth,input);
             return ok(result,"Dispositivo atualizado com sucesso");
         }catch (erro){
             return handleError(erro);

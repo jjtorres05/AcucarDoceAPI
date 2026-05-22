@@ -4,6 +4,7 @@ import { obfuscateId, deobfuscateId } from "../utils/obfuscateId";
 import { NotFoundError } from "../utils/errors";
 import { AuthContext, DispositivoResponse, DispositivoCreateResponse, PaginatedResponse } from "../types";
 import { CriarDispositivoInput, AtualizarDispositivoInput } from "../schemas/dispositivoSchema";
+import { date } from "zod/v4";
 
 function toResponse(d:{
     id: number,
@@ -63,14 +64,14 @@ export const dispositivoService = {
 
     atualizar: async (
         auth: AuthContext,
-        obfuscatedId: string,
         input: AtualizarDispositivoInput
     ): Promise <DispositivoResponse>=>{
-        const id = deobfuscateId("dispositivo",obfuscatedId);
+        const id = deobfuscateId("dispositivo",input.id);
+        const {id:_,...data}= input;
         const dispositivo = await dispositivoRepository.update(
             id,
             auth.empresa_id,
-            input,
+            data,
             auth.usuario_id
         );
         if (!dispositivo){

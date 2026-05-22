@@ -8,6 +8,7 @@ export const criarSensorSchema = z.object({
 });
 
 export const atualizarSensorSchema = z.object({
+    id: z.string().min(1,"id é obrigatorio"),
     nome_modelo: z.string().min(1,"nome modelo obrigatorio").max(255, "nome_modelo deve ter no maximo 255 caracteres").optional(),
     tipo_sensor: z.string().min (1,"tipo de sensor obrigatorio").max(100,"tipo_sensor deve ter no maximo 100 caracteres").optional(),
     unidade: z.string().min (1,"unidade do sensor obrigatorio").max(50,"unidade deve ter no maximo 50 caracteres").optional(),
