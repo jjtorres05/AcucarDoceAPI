@@ -41,12 +41,16 @@ export const atuadorRepository = {
             const atuador= await tx.atuador.create({
                 data, select: safeSelect,
             });
+            const dispositivo = await tx.dispositivo.findUnique({
+                where: { id: data.dispositivo_id },  // o antes.dispositivo_id en update/deactivate
+                select: { nome_modelo: true },
+            });
             await tx.log.create({
                 data: {
                     tabela: "atuador",
                     operacao: "CREATE",
                     dispositivo_id: data.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "CREATE",
@@ -77,6 +81,10 @@ export const atuadorRepository = {
             if(!antes){
                 throw new NotFoundError("Atuador noa encontrado");
             }
+            const dispositivo = await tx.dispositivo.findUnique({
+                where: { id: antes.dispositivo_id },  
+                select: { nome_modelo: true },
+            });
             const atuador= await tx.atuador.update({
                 where: {id}, data, select: safeSelect,
             });
@@ -86,7 +94,7 @@ export const atuadorRepository = {
                     tabela: "atuador",
                     operacao: "UPDATE",
                     dispositivo_id: atuador.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "UPDATE",
@@ -106,6 +114,10 @@ export const atuadorRepository = {
                 where: {id, dispositivo:{empresa_id}},select: safeSelect,
             });
             if(!antes) throw new NotFoundError("Atuador nao encontrado");
+            const dispositivo = await tx.dispositivo.findUnique({
+                where: { id: antes.dispositivo_id },  // o antes.dispositivo_id en update/deactivate
+                select: { nome_modelo: true },
+            });
             const atuador = await tx.atuador.update({
                 where:{id}, data: {ativo: false}, select: safeSelect,
             });
@@ -115,7 +127,7 @@ export const atuadorRepository = {
                     tabela: "atuador",
                     operacao: "DEACTIVATE",
                     dispositivo_id: atuador.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "DEACTIVATE",

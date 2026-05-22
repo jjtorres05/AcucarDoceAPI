@@ -43,6 +43,10 @@ export const sensorRepository={
         executadoPorId: number
     )=>
         getPrismaClient().$transaction(async(tx)=>{
+            const dispositivo= await tx.dispositivo.findUnique({
+                where: {id: data.dispositivo_id},
+                select: {nome_modelo: true},
+            })
             const sensor = await tx.sensor.create({
                 data,
                 select: safeSelect,
@@ -52,7 +56,7 @@ export const sensorRepository={
                     tabela: "sensor",
                     operacao: "CREATE",
                     dispositivo_id: data.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "CREATE",
@@ -81,6 +85,10 @@ export const sensorRepository={
                 where: {id, dispositivo:{empresa_id}}, select: safeSelect,
             });
             if(!antes) throw new NotFoundError("Dispositivo nao encontrado");
+            const dispositivo= await tx.dispositivo.findUnique({
+                where: {id: antes.dispositivo_id},
+                select: {nome_modelo: true},
+            })
             const sensor = await tx.sensor.update({
                 where: {id}, data, select: safeSelect,
             });
@@ -90,7 +98,7 @@ export const sensorRepository={
                     tabela: "sensor",
                     operacao: "UPDATE",
                     dispositivo_id: sensor.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "UPDATE",
@@ -110,6 +118,10 @@ export const sensorRepository={
                 select: safeSelect,
             });
             if(!antes) throw new NotFoundError("Sensor nao encontrado");
+            const dispositivo= await tx.dispositivo.findUnique({
+                where: {id: antes.dispositivo_id},
+                select: {nome_modelo: true},
+            })
             const sensor = await tx.sensor.update({
                 where:{id},
                 data: {ativo: false},
@@ -121,7 +133,7 @@ export const sensorRepository={
                     tabela: "sensor",
                     operacao: "DEACTIVATE",
                     dispositivo_id: sensor.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "DEACTIVATE",

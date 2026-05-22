@@ -44,6 +44,10 @@ export const alertaRepository = {
         executadoPorId: number,
     )=> 
         getPrismaClient().$transaction(async (tx)=>{
+            const dispositivo = await tx.dispositivo.findUnique({
+                where: { id: data.dispositivo_id },  // o antes.dispositivo_id en update/deactivate
+                select: { nome_modelo: true },
+            });
             const alerta = await tx.alerta.create({
                 data, select: safeSelect,
             });
@@ -52,7 +56,7 @@ export const alertaRepository = {
                     tabela: "alerta",
                     operacao: "CREATE",
                     dispositivo_id: data.dispositivo_id,
-                    dispositivo_nome: null,
+                    dispositivo_nome: dispositivo?.nome_modelo ?? null,
                     empresa_id,
                     descricao: montarDescricaoLog({
                         acao: "CREATE",
