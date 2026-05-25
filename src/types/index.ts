@@ -95,3 +95,20 @@ export interface LogResponse {
     empresa_id: number;
     created_at: Date;
 }
+
+//Dto leitura (em mongoDB)
+export interface LeituraResponse {
+    id: string;                 //objectId do mongo o jeito que encontrei que é gerado
+    dispositivo_id: string;     //id ofuscado na hora de mostrar
+    sensor_id: string;          //mesma coisa que o ID de encima
+    valor: number;              //numero da leitura do sensor
+    unidade: string;            
+    created_at: Date;
+}
+
+
+//Filtro de data para leituras
+export interface FiltroData {
+    inicio?: Date;
+    fim?: Date;
+}

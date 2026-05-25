@@ -26,7 +26,7 @@ export function extractAuthContext(request: HttpRequest): AuthContext {
     }
 
     const token = authHeader.substring(7);
-    const empresaIdParam= request.params.empresaId;
+    const empresaIdParam= request.query.get("empresaId");
     if(!empresaIdParam){
         throw new UnauthorizedError("Parametro empresaId ausente na rota");
     }

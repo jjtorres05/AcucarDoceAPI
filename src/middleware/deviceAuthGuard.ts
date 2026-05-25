@@ -1,4 +1,3 @@
-import { HttpRequest } from "@azure/functions";
 import { DeviceContext } from "../types";
 import { UnauthorizedError, NotFoundError } from "../utils/errors";
 import { verifyDeviceToken } from "../utils/deviceToken";
@@ -6,38 +5,28 @@ import { dispositivoRepository } from "../repositories/dispositvoRepository";
 import { deobfuscateId } from "../utils/obfuscateId";
 
 export async function extractDeviceContext(
-    request: HttpRequest
+    obfuscatedDispositivoId: string,
+    tokenDispositivo: string,
+    empresa_id: number
     ): Promise<DeviceContext> {
-    const deviceToken = request.headers.get("x-device-token");
-    if (!deviceToken) {
-        throw new UnauthorizedError("Header x-device-token ausente");
-    }
+        const dispositivoId =  deobfuscateId("dispositivo",obfuscatedDispositivoId);
 
-    const dispositivoIdObfuscated = request.headers.get("x-device-id");
-    if (!dispositivoIdObfuscated) {
-        throw new UnauthorizedError("Header x-device-id ausente");
-    }
+        const dispositivo = await dispositivoRepository.findWithHash(dispositivoId);
+        if (!dispositivo) {
+            throw new NotFoundError("Dispositivo não encontrado");
+        }
+        if(!dispositivo.ativo){
+            throw new UnauthorizedError("Dispositivo inativo");
+        }
+        if(dispositivo.empresa_id !== empresa_id){
+            throw new UnauthorizedError("Dispositivo nao pertence a esta empresa");
+        }
 
-    const dispositivoId = deobfuscateId("dispositivo", dispositivoIdObfuscated);
+        const tokenValido = await verifyDeviceToken(tokenDispositivo, dispositivo.token_dispositivo_hash);
 
-    const dispositivo = await dispositivoRepository.findWithHash(dispositivoId);
-
-    if (!dispositivo) {
-        throw new NotFoundError("Dispositivo não encontrado");
-    }
-
-    if (!dispositivo.ativo) {
-        throw new UnauthorizedError("Dispositivo inativo");
-    }
-
-    const isValid = await verifyDeviceToken(
-        deviceToken,
-        dispositivo.token_dispositivo_hash
-    );
-
-    if (!isValid) {
-        throw new UnauthorizedError("Token de dispositivo inválido");
-    }
+        if (!tokenValido) {
+            throw new UnauthorizedError("Token de dispositivo inválido");
+        }
 
     return {
         dispositivo_id: dispositivo.id,

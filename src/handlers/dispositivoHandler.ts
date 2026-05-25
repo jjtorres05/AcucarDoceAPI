@@ -17,7 +17,7 @@ export const dispositivoHandler ={
             await checkPermission(token, auth.empresa_id, "dispositivo","criar");
             const input = await parseAndValidate(request, criarDispositivoSchema);
             const result = await dispositivoService.criar(auth,input);
-            return created(result,"Dispositivo criado. Guarde o token - elenao sera exibido novamente");
+            return created(result,"Dispositivo criado. Guarde o token - ele nao sera exibido novamente");
 
         }catch(erro){
             return handleError(erro);
@@ -27,21 +27,12 @@ export const dispositivoHandler ={
     Promise<HttpResponseInit> => {
         try{
             const auth = extractAuthContext(request);
-            const result = await dispositivoService.listar(auth);
-            return ok(result);
-        }catch (erro){
-            return handleError(erro);
-        }
-    },
-    obterPorId: async (request: HttpRequest):
-    Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const id = request.params.id;
-            if(!id){
-                return handleError(new Error("Parametro id ausente"));
+            const id= request.query.get("id");
+            if(id){
+                const result = await dispositivoService.obTerPorId(auth,id);
+                return ok(result);
             }
-            const result = await dispositivoService.obTerPorId(auth,id);
+            const result = await dispositivoService.listar(auth);
             return ok(result);
         }catch (erro){
             return handleError(erro);
@@ -66,7 +57,7 @@ export const dispositivoHandler ={
         const token = extractToken(request);
         await checkPermission(token, auth.empresa_id, "dispositivo", "deletar");
 
-        const id = request.params.id;
+        const id = request.query.get("id");
         if (!id) {
             return handleError(new Error("Parâmetro id ausente"));
         }
@@ -83,7 +74,7 @@ export const dispositivoHandler ={
         const token = extractToken(request);
         await checkPermission(token, auth.empresa_id, "dispositivo", "atualizar");
 
-        const id = request.params.id;
+        const id = request.query.get("id");
         if (!id) {
             return handleError(new Error("Parâmetro id ausente"));
         }
