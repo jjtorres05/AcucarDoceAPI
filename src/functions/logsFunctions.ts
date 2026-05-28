@@ -8,12 +8,15 @@ async function logCrud(request: HttpRequest, context: InvocationContext): Promis
         context.log(`[logs] ${request.method} ${request.url}`);
 
         const token = extractToken(request);
-        const usuario = await verificarUsuario(token);
-        const empresa_id = extrairEmpresaId(request);
-        const auth = { usuario_id: usuario.id, empresa_id };
+        const empresaIdOfuscado = request.query.get("empresaId");
+        if(!empresaIdOfuscado){
+            return {status: 400, jsonBody: {success: false, error: "empresaId ausente"}};
+        }
+        const usuario = await verificarUsuario(token,empresaIdOfuscado);
+        const auth = { usuario_id: usuario.id, empresa_id: usuario.empresa.id };
 
         if (request.method === "GET") {
-            checkPermission(usuario, empresa_id, "listar");
+            checkPermission(usuario, "listar");
             return await logHandler.listar(request, auth);
         }
 

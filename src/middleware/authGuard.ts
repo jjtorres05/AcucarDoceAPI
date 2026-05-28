@@ -1,6 +1,6 @@
 import { HttpRequest } from "@azure/functions";
 import jwt from "jsonwebtoken";
-import { AuthContext, UsuarioConecta } from "../types";
+import { UsuarioVerificado } from "../types";
 import { UnauthorizedError, ForbiddenError } from "../utils/errors";
 import { getConectaApiUrl } from "../utils/conectaApi";
 import { deobfuscateId } from "../utils/obfuscateId";
@@ -13,19 +13,27 @@ export function extractToken(request: HttpRequest): string {
     }
     return authHeader.substring(7);
 }
-export async function verificarUsuario(token: string):
-Promise <UsuarioConecta> {
-    const response = await fetch(`${getConectaApiUrl()}/auth/me`,{
+
+export async function verificarUsuario(
+    token: string,
+    empresaIdOfuscado: string
+): Promise <UsuarioVerificado> {
+    const response = await fetch(`${getConectaApiUrl()}/auth/verificar?empresaId=${empresaIdOfuscado}`,{
         method: "GET",
         headers: {
             "Authorization": `Bearer ${token}`,
         },
     });
-    if (!response.ok){
-        throw new UnauthorizedError("Token invalido ou expirado");
+    if(!response.ok){
+        const data = await response.json();
+        if(response.status === 403){
+            throw new ForbiddenError(data.error || "Acesso negados");
+        }
+        throw new UnauthorizedError(data.error || "Token invalido");
     }
-    return await response.json() as UsuarioConecta;
+    return await response.json() as UsuarioVerificado;
 }
+
 
 export function extrairEmpresaId(request: HttpRequest): number {
     const empresaIdParam = request.query.get("empresaId");
@@ -38,21 +46,15 @@ export function extrairEmpresaId(request: HttpRequest): number {
 
 
 export function checkPermission(
-    usuario: UsuarioConecta,
-    empresa_id: number,
+    usuario: UsuarioVerificado,
     acao: string,
     ): void {
     //admin interno pode tudo
     if(usuario.tipo === "interno" && usuario.rolInterno === "admin_interno"){
         return;
     }
-    //procura a empresa do usuario
-    const empresa = usuario.empresas.find(e=> e.id === empresa_id);
-    if(!empresa){
-        throw new ForbiddenError("Usuario nao pertence a esta empresa");
-    }
     //admin_externo pode tudo dentro da sua empresa
-    if (empresa.rolEmpresa === "admin_externo"){
+    if (usuario.empresa.rolEmpresa === "admin_externo"){
         return;
     }
     //comum_externo pode só listar

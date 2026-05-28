@@ -112,29 +112,16 @@ export interface FiltroData {
     inicio?: Date;
     fim?: Date;
 }
-
-export interface EmpresaUsuario {
-    id: number;
-    nome: string;
-    rolEmpresa: string;
-}
-
-export interface UsuarioConecta {
-    id: number;
-    tipo: string;
-    rolInterno:string | null ;
-    empresas: EmpresaUsuario[];
-}
-
+//O que espera da resposta da rota de verificar do conecta
 export interface UsuarioVerificado {
     id: number;
     nome: string;
     tipo: string;
     rolInterno: string | null;
-    empres: {
+    empresa: {
         id: number;
         nome: string;
-        rolExterno: string | null;
+        rolEmpresa: string | null;
     };
 }
 

@@ -2,26 +2,31 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 import { extractToken, verificarUsuario, extrairEmpresaId, checkPermission } from "../middleware/authGuard";
 import { alertaHandler } from "../handlers/alertaHandler";
 import { handleError } from "../utils/httpResponse";
+import { success } from "zod/v4";
+import { error } from "console";
 
 async function alertaCrud(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
     try {
         context.log(`[alertas] ${request.method} ${request.url}`);
 
         const token = extractToken(request);
-        const usuario = await verificarUsuario(token);
-        const empresa_id = extrairEmpresaId(request);
-        const auth = { usuario_id: usuario.id, empresa_id };
+        const empresaIdOfuscado = request.query.get("empresaId");
+        if(!empresaIdOfuscado){
+            return {status: 400, jsonBody: {success: false, error: "empresaId ausente"}};
+        }
+        const usuario = await verificarUsuario(token, empresaIdOfuscado);
+        const auth = { usuario_id: usuario.id, empresa_id: usuario.empresa.id };
 
         if (request.method === "GET") {
-            checkPermission(usuario, empresa_id, "listar");
+            checkPermission(usuario, "listar");
             return await alertaHandler.listar(request, auth);
         }
         else if (request.method === "POST") {
-            checkPermission(usuario, empresa_id, "criar");
+            checkPermission(usuario, "criar");
             return await alertaHandler.criar(request, auth);
         }
         else if (request.method === "DELETE") {
-            checkPermission(usuario, empresa_id, "deletar");
+            checkPermission(usuario, "deletar");
             return await alertaHandler.deletar(request, auth);
         }
 
