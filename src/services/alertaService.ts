@@ -100,4 +100,12 @@ export const alertaService = {
         }
         return toResponse(alerta);
     },
+
+    deletar: async(
+        auth: AuthContext,
+        obfuscatedId: string,
+    ): Promise<void> => {
+        const id = deobfuscateId("alerta", obfuscatedId);
+        await alertaRepository.delete(id, auth.empresa_id, auth.usuario_id);
+    },
 };

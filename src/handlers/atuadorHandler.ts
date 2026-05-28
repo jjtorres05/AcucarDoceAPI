@@ -1,98 +1,58 @@
 import { HttpRequest, HttpResponseInit } from "@azure/functions";
-import { extractAuthContext, extractToken, checkPermission } from "../middleware/authGuard";
+import { AuthContext } from "../types";
 import { parseAndValidate } from "../middleware/validateBody";
 import { criarAtuadorSchema, atualizarAtuadorSchema } from "../schemas/atuadorSchema";
 import { atuadorService } from "../services/atuadorService";
-import { handleError, ok, created } from "../utils/httpResponse";
-import { request } from "http";
-import { catchall } from "zod/v4-mini";
-import { tr } from "zod/v4/locales";
+import { ok, created, handleError } from "../utils/httpResponse";
 
-export const atuadorHandler={
-    criar: async( request: HttpRequest):
-    Promise <HttpResponseInit>=> {
-        try{
-            const auth= extractAuthContext(request);
-            const token= extractToken(request);
-            await checkPermission(token,auth.empresa_id,"atuador","criar");
-
-            const input = await parseAndValidate(request, criarAtuadorSchema);
-            const result = await atuadorService.criar(auth,input);
-            return created(result,"Atuador criado com sucesso");
-        }catch (erro){
-            return handleError(erro);
-        }
+export const atuadorHandler = {
+    criar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const input = await parseAndValidate(request, criarAtuadorSchema);
+        const result = await atuadorService.criar(auth, input);
+        return created(result, "Atuador criado com sucesso");
     },
 
-    listarPorDispositivo: async(request: HttpRequest):
-    Promise <HttpResponseInit> => {
-        try{
-            const auth= extractAuthContext(request);
-            const dispositivoId= request.params.dispositivoId;
-            if(!dispositivoId){
-                return handleError(new Error("Parametro dispositivoId faltando"));
-            }
-            const result = await atuadorService.listarPorDispositivo(auth,dispositivoId);
+    listar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const id = request.query.get("id");
+        const dispositivoId = request.query.get("dispositivoId");
+        if (id) {
+            const result = await atuadorService.obterPorId(auth, id);
             return ok(result);
-        }catch (erro){
-            return handleError(erro);
         }
-    },
-
-    listarPorEmpresa: async(request: HttpRequest):
-    Promise <HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const result = await atuadorService.listarPorEmpresa(auth);
+        if (dispositivoId) {
+            const result = await atuadorService.listarPorDispositivo(auth, dispositivoId);
             return ok(result);
-        }catch (erro){
-            return handleError(erro);
         }
+        const result = await atuadorService.listarPorEmpresa(auth);
+        return ok(result);
     },
 
-    obterPorId : async(request: HttpRequest):
-    Promise <HttpResponseInit> => {
-        try {
-            const auth= extractAuthContext(request);
-            const id = request.params.id;
-            if(!id){
-                return handleError(new Error("parametro Id faltando"));
-            }
-            const result = await atuadorService.obterPorId(auth,id);
-            return ok(result);
-        }catch (erro){
-            return handleError(erro);
-        }
+    atualizar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const input = await parseAndValidate(request, atualizarAtuadorSchema);
+        const result = await atuadorService.atualizar(auth, input);
+        return ok(result, "Atuador atualizado com sucesso");
     },
 
-    atualizar: async(request: HttpRequest):
-    Promise <HttpResponseInit> => {
-        try {
-            const auth= extractAuthContext(request);
-            const token= extractToken(request);
-            await checkPermission(token,auth.empresa_id,"atuador","atualizar");
-            const input= await parseAndValidate(request,atualizarAtuadorSchema);
-            const result= await atuadorService.atualizar(auth,input);
-            return ok(result,"Atuador atualizado com sucesso");
-        }catch (erro){
-            return handleError(erro);
+    desativar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const id = request.query.get("id");
+        if (!id) {
+            return handleError(new Error("parametro Id faltando na query"));
         }
+        await atuadorService.desativar(auth, id);
+        return ok(null, "Atuador desativo com sucesso");
     },
 
-    desativar: async(request: HttpRequest):
-    Promise <HttpResponseInit> => {
-        try {
-            const auth= extractAuthContext(request);
-            const token= extractToken(request);
-            await checkPermission(token, auth.empresa_id,"atuador","deletar");
-            const id= request.params.id;
-            if(!id){
-                return handleError(new Error("parametro Id faltando"));
-            }
-            await atuadorService.desativar(auth,id);
-            return ok(null,"Atuador desativo com sucesso");
-        }catch(erro){
-            return handleError(erro);
+    deletar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const id = request.query.get("id");
+        if (!id) {
+            return handleError(new Error("Parametro id ausente"));
         }
+        await atuadorService.deletar(auth, id);
+        return ok(null, "Atuador deletado com sucesso");
     },
 };

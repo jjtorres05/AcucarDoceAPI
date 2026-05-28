@@ -176,4 +176,33 @@ export const dispositivoRepository={
                 },
             });
         }),
+    delete: (id: number, empresa_id: number, executadoPorId: number) =>
+    getPrismaClient().$transaction(async (tx) => {
+        const dispositivo = await tx.dispositivo.findFirst({
+            where: { id, empresa_id },
+            select: safeSelect,
+        });
+        if (!dispositivo) throw new NotFoundError("Dispositivo nao encontrado");
+
+        await tx.log.create({
+            data: {
+                tabela: "dispositivo",
+                operacao: "DELETE",
+                dispositivo_id: null,
+                dispositivo_nome: dispositivo.nome_modelo,
+                empresa_id,
+                descricao: montarDescricaoLog({
+                    acao: "DELETE",
+                    entidade: "dispositivo",
+                    registroId: dispositivo.id,
+                    executadoPor: executadoPorId,
+                    dados: {
+                        nome_modelo: dispositivo.nome_modelo,
+                    },
+                }),
+            },
+        });
+
+        await tx.dispositivo.delete({ where: { id } });
+    }),
 };

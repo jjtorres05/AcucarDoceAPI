@@ -106,4 +106,11 @@ export const dispositivoService = {
         );
         return {token_dispositivo: tokenOriginal};
     },
+    deletar: async(
+        auth: AuthContext,
+        obfuscatedId: string
+    ): Promise<void> => {
+        const id = deobfuscateId("dispositivo",obfuscatedId);
+        await dispositivoRepository.delete(id,auth.empresa_id, auth.usuario_id);
+    },
 };

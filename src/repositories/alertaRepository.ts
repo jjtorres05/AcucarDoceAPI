@@ -1,7 +1,6 @@
-import { get } from "http";
 import { getPrismaClient } from "../database/prismaClient";
 import { montarDescricaoLog } from "../utils/logHelper";
-import { date } from "zod/v4";
+import { NotFoundError } from "../utils/errors";
 
 const safeSelect={
     id:true,
@@ -74,4 +73,39 @@ export const alertaRepository = {
             });
             return alerta;
         }),
+    delete: (id: number, empresa_id: number, executadoPorId: number) =>
+    getPrismaClient().$transaction(async (tx) => {
+        const alerta = await tx.alerta.findFirst({
+            where: { id, dispositivo: { empresa_id } },
+            select: safeSelect,
+        });
+        if (!alerta) throw new NotFoundError("Alerta nao encontrado");
+
+        const dispositivo = await tx.dispositivo.findUnique({
+            where: { id: alerta.dispositivo_id },
+            select: { nome_modelo: true },
+        });
+
+        await tx.log.create({
+            data: {
+                tabela: "alerta",
+                operacao: "DELETE",
+                dispositivo_id: alerta.dispositivo_id,
+                dispositivo_nome: dispositivo?.nome_modelo ?? null,
+                empresa_id,
+                descricao: montarDescricaoLog({
+                    acao: "DELETE",
+                    entidade: "alerta",
+                    registroId: alerta.id,
+                    executadoPor: executadoPorId,
+                    dados: {
+                        tipo: alerta.tipo,
+                        mensagem: alerta.mensagem,
+                    },
+                }),
+            },
+        });
+
+        await tx.alerta.delete({ where: { id } });
+    }),
 };

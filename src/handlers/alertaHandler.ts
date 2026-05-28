@@ -1,79 +1,47 @@
 import { HttpRequest, HttpResponseInit } from "@azure/functions";
-import { extractAuthContext, extractToken, checkPermission } from "../middleware/authGuard";
+import { AuthContext } from "../types";
 import { parseAndValidate } from "../middleware/validateBody";
 import { criarAlertaSchema } from "../schemas/alertaSchema";
 import { alertaService } from "../services/alertaService";
-import { handleError, ok, created } from "../utils/httpResponse";
+import { ok, created, handleError } from "../utils/httpResponse";
 
 export const alertaHandler = {
-    criar: async (request: HttpRequest):
+    criar: async (request: HttpRequest, auth: AuthContext):
     Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const token = extractToken(request);
-            await checkPermission(token, auth.empresa_id, "alerta", "criar");
-
-            const input = await parseAndValidate(request, criarAlertaSchema);
-            const result = await alertaService.criar(auth, input);
-            return created(result, "Alerta criado com sucesso");
-        } catch (erro) {
-            return handleError(erro);
-        }
+        const input = await parseAndValidate(request, criarAlertaSchema);
+        const result = await alertaService.criar(auth, input);
+        return created(result, "Alerta criado com sucesso");
     },
 
-    listarPorEmpresa: async (request: HttpRequest):
+    listar: async (request: HttpRequest, auth: AuthContext):
     Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const result = await alertaService.listarPorEmpresa(auth);
-            return ok(result);
-        } catch (erro) {
-            return handleError(erro);
-        }
-    },
+        const id = request.query.get("id");
+        const dispositivoId = request.query.get("dispositivoId");
+        const sensorId = request.query.get("sensorId");
 
-    listarPorDispositivo: async (request: HttpRequest):
-    Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const dispositivoId = request.params.dispositivoId;
-            if (!dispositivoId) {
-                return handleError(new Error("Parametro dispositivoId faltando"));
-            }
-            const result = await alertaService.listarPorDispositivo(auth, dispositivoId);
-            return ok(result);
-        } catch (erro) {
-            return handleError(erro);
-        }
-    },
-
-    listarPorSensor: async (request: HttpRequest):
-    Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const sensorId = request.params.sensorId;
-            if (!sensorId) {
-                return handleError(new Error("Parametro sensorId faltando"));
-            }
-            const result = await alertaService.listarPorSensor(auth, sensorId);
-            return ok(result);
-        } catch (erro) {
-            return handleError(erro);
-        }
-    },
-
-    obterPorId: async (request: HttpRequest):
-    Promise<HttpResponseInit> => {
-        try {
-            const auth = extractAuthContext(request);
-            const id = request.params.id;
-            if (!id) {
-                return handleError(new Error("Parametro Id faltando"));
-            }
+        if (id) {
             const result = await alertaService.obterPorId(auth, id);
             return ok(result);
-        } catch (erro) {
-            return handleError(erro);
         }
+        if (dispositivoId) {
+            const result = await alertaService.listarPorDispositivo(auth, dispositivoId);
+            return ok(result);
+        }
+        if (sensorId) {
+            const result = await alertaService.listarPorSensor(auth, sensorId);
+            return ok(result);
+        }
+        const result = await alertaService.listarPorEmpresa(auth);
+        return ok(result);
+    },
+
+    deletar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const id = request.query.get("id");
+        if (!id) {
+            return handleError(new Error("Parametro id ausente"));
+        }
+        await alertaService.deletar(auth, id);
+        return ok(null, "Alerta deletado com sucesso");
     },
 };

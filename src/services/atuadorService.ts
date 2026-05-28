@@ -106,4 +106,12 @@ export const atuadorService={
             auth.usuario_id,
         );
     },
+
+    deletar: async(
+        auth: AuthContext,
+        obfuscatedId: string,
+    ): Promise<void> => {
+        const id = deobfuscateId("atuador", obfuscatedId);
+        await atuadorRepository.delete(id, auth.empresa_id, auth.usuario_id);
+    },
 };

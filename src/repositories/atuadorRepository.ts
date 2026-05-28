@@ -139,4 +139,38 @@ export const atuadorRepository = {
                 },
             });
         }),
+    
+    delete: (id: number, empresa_id: number, executadoPorId: number)=>
+        getPrismaClient().$transaction(async(tx)=>{
+            const atuador = await tx.atuador.findFirst({
+                where: {id, dispositivo:{empresa_id}},
+                select: safeSelect,
+            });
+            if(!atuador) throw new NotFoundError("Atuador nao encontrado");
+            const dispositivo = await tx.dispositivo.findUnique({
+                where: {id: atuador.dispositivo_id},
+                select: {nome_modelo: true}
+            });
+
+            await tx.log.create({
+                data:{
+                    tabela: "atuador",
+                    operacao: "DELETE",
+                    dispositivo_id: atuador.dispositivo_id,
+                    dispositivo_nome: dispositivo?.nome_modelo?? null,
+                    empresa_id,
+                    descricao: montarDescricaoLog({
+                        acao: "DELETE",
+                        entidade: "atudador",
+                        registroId: atuador.id,
+                        executadoPor: executadoPorId,
+                        dados: {
+                            nome_modelo: atuador.nome_modelo,
+                            tipo: atuador.tipo
+                        },
+                    }),
+                },
+            });
+            await tx.atuador.delete({where:{id}});
+        }),
 };

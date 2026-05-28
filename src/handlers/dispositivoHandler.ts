@@ -1,89 +1,63 @@
 import { HttpRequest, HttpResponseInit } from "@azure/functions";
-import { extractAuthContext, extractToken, checkPermission } from "../middleware/authGuard";
+import { AuthContext } from "../types";
 import { parseAndValidate } from "../middleware/validateBody";
 import { criarDispositivoSchema, atualizarDispositivoSchema } from "../schemas/dispositivoSchema";
 import { dispositivoService } from "../services/dispositivoService";
 import { ok, created, handleError } from "../utils/httpResponse";
-import { request } from "http";
-import { promises } from "dns";
-import { tr } from "zod/v4/locales";
 
-export const dispositivoHandler ={
-    criar: async (request: HttpRequest):
+export const dispositivoHandler = {
+    criar: async (request: HttpRequest, auth: AuthContext):
     Promise<HttpResponseInit> => {
-        try{
-            const auth= extractAuthContext(request);
-            const token= extractToken(request);
-            await checkPermission(token, auth.empresa_id, "dispositivo","criar");
-            const input = await parseAndValidate(request, criarDispositivoSchema);
-            const result = await dispositivoService.criar(auth,input);
-            return created(result,"Dispositivo criado. Guarde o token - ele nao sera exibido novamente");
-
-        }catch(erro){
-            return handleError(erro);
-        }
+        const input = await parseAndValidate(request, criarDispositivoSchema);
+        const result = await dispositivoService.criar(auth, input);
+        return created(result, "Dispositivo criado. Guarde o token - ele nao sera exibido novamente");
     },
-    listar: async (request: HttpRequest):
+
+    listar: async (request: HttpRequest, auth: AuthContext):
     Promise<HttpResponseInit> => {
-        try{
-            const auth = extractAuthContext(request);
-            const id= request.query.get("id");
-            if(id){
-                const result = await dispositivoService.obTerPorId(auth,id);
-                return ok(result);
-            }
-            const result = await dispositivoService.listar(auth);
+        const id = request.query.get("id");
+        if (id) {
+            const result = await dispositivoService.obTerPorId(auth, id);
             return ok(result);
-        }catch (erro){
-            return handleError(erro);
         }
+        const result = await dispositivoService.listar(auth);
+        return ok(result);
     },
-    atualizar: async (request: HttpRequest):
-    Promise<HttpResponseInit> => {
-        try {
-            const auth= extractAuthContext(request);
-            const token= extractToken(request);
-            await checkPermission(token, auth.empresa_id,"dispositivo","atualizar");
-            const input= await parseAndValidate(request,atualizarDispositivoSchema);
-            const result = await dispositivoService.atualizar(auth,input);
-            return ok(result,"Dispositivo atualizado com sucesso");
-        }catch (erro){
-            return handleError(erro);
-        }
-    },
-    desativar: async (request: HttpRequest): Promise<HttpResponseInit> => {
-        try {
-        const auth = extractAuthContext(request);
-        const token = extractToken(request);
-        await checkPermission(token, auth.empresa_id, "dispositivo", "deletar");
 
+    atualizar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const input = await parseAndValidate(request, atualizarDispositivoSchema);
+        const result = await dispositivoService.atualizar(auth, input);
+        return ok(result, "Dispositivo atualizado com sucesso");
+    },
+
+    desativar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
         const id = request.query.get("id");
         if (!id) {
             return handleError(new Error("Parâmetro id ausente"));
         }
-
         await dispositivoService.desativar(auth, id);
         return ok(null, "Dispositivo desativado com sucesso");
-        } catch (error) {
-        return handleError(error);
-        }
     },
-    regenerarToken: async (request: HttpRequest): Promise<HttpResponseInit> => {
-        try {
-        const auth = extractAuthContext(request);
-        const token = extractToken(request);
-        await checkPermission(token, auth.empresa_id, "dispositivo", "atualizar");
 
+    deletar: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
+        const id = request.query.get("id");
+        if (!id) {
+            return handleError(new Error("Parametro id ausente"));
+        }
+        await dispositivoService.deletar(auth, id);
+        return ok(null, "Dispositivo deletado com sucesso");
+    },
+
+    regenerarToken: async (request: HttpRequest, auth: AuthContext):
+    Promise<HttpResponseInit> => {
         const id = request.query.get("id");
         if (!id) {
             return handleError(new Error("Parâmetro id ausente"));
         }
-
         const result = await dispositivoService.regenerarToken(auth, id);
         return ok(result, "Token regenerado. Guarde o token — ele não será exibido novamente.");
-        } catch (error) {
-        return handleError(error);
-        }
     },
-
-}
+};

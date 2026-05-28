@@ -144,5 +144,38 @@ export const sensorRepository={
                     }),
                 },
             });
-        }),  
+        }),
+        
+    delete: (id: number, empresa_id: number, executadoPorId: number)=>
+    getPrismaClient().$transaction(async(tx)=>{
+        const sensor= await tx.sensor.findFirst({
+            where: {id,dispositivo:{empresa_id}}, 
+            select: safeSelect,
+        });
+        if(!sensor) throw new NotFoundError("Sensor nao encontrado");
+        const dispositivo= await tx.dispositivo.findUnique({
+            where: {id: sensor.dispositivo_id},
+            select: {nome_modelo: true}
+        });
+        await tx.log.create({
+            data: {
+                tabela: "sensor",
+                operacao: "DELETE",
+                dispositivo_id: sensor.dispositivo_id,
+                dispositivo_nome: dispositivo?.nome_modelo?? null,
+                empresa_id,
+                descricao: montarDescricaoLog({
+                    acao: "DELETE",
+                    entidade: "sensor",
+                    registroId: sensor.id,
+                    executadoPor: executadoPorId,
+                    dados:{
+                        nome_modelo: sensor.nome_modelo,
+                        tipo_sensor: sensor.tipo_sensor,
+                    },
+                }),
+            },
+        });
+        await tx.sensor.delete({ where: { id } });
+    }),
 };

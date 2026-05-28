@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { ValidationError } from "./errors";
 
-export type TipoId = "dispositivo" | "sensor" | "atuador" | "alerta" | "log";
+export type TipoId = "dispositivo" | "sensor" | "atuador" | "alerta" | "log" | "empresa";
 
 const secret = process.env.ID_OBFUSCATION_SECRET;
 if (!secret) {

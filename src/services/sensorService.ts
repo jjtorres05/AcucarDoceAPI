@@ -108,4 +108,12 @@ export const sensorService={
             auth.usuario_id,
         );
     },
+
+    deletar: async(
+        auth: AuthContext,
+        obfuscatedId: string,
+    ): Promise<void>=> {
+        const id = deobfuscateId("sensor", obfuscatedId);
+        await sensorRepository.delete(id, auth.empresa_id, auth.usuario_id);
+    },
 };
