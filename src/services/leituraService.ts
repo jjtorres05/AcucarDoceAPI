@@ -9,19 +9,20 @@ import { ObjectId } from "mongodb";
 
 function toResponse(l:{
     _id: ObjectId,
-    dispositivo_id: number,
-    sensor_id: number,
+    timestamp: Date,
+    metadata: {
+        dispositivo_id: number,
+        sensor_id: number,
+        empresa_id: number,
+    },
     valor: number,
-    unidade: string,
-    created_at: Date,
 }): LeituraResponse {
     return {
         id: l._id.toHexString(),
-        dispositivo_id: obfuscateId("dispositivo",l.dispositivo_id),
-        sensor_id: obfuscateId("sensor",l.sensor_id),
+        dispositivo_id: obfuscateId("dispositivo",l.metadata.dispositivo_id),
+        sensor_id: obfuscateId("sensor",l.metadata.sensor_id),
         valor: l.valor,
-        unidade: l.unidade,
-        created_at: l.created_at
+        created_at: l.timestamp
     };
 }
 
@@ -47,7 +48,6 @@ export const leituraService={
             sensor_id: sensorId,
             empresa_id: device.empresa_id,
             valor: input.valor,
-            unidade: input.unidade,
         });
         return toResponse(leitura);
     },
@@ -84,7 +84,7 @@ export const leituraService={
         auth: AuthContext,
         id: string
     ): Promise<LeituraResponse>=> {
-        const leitura = await leituraRepository.finndByIdAndEmpresa(id,auth.empresa_id);
+        const leitura = await leituraRepository.findByIdAndEmpresa(id,auth.empresa_id);
         if(!leitura){
             throw new NotFoundError("Leitura nao encontrada");
         }

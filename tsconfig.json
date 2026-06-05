@@ -13,10 +13,11 @@
         "declaration": true,
         "declarationMap": true,
         "noUncheckedIndexedAccess": true,
-        "types": ["node"]
+        "types": ["node", "jest"]
     },
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "tests/**/*.ts"
     ],
     "exclude": [
         "node_modules",

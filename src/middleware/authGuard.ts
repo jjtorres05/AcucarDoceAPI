@@ -1,5 +1,4 @@
 import { HttpRequest } from "@azure/functions";
-import jwt from "jsonwebtoken";
 import { UsuarioVerificado } from "../types";
 import { UnauthorizedError, ForbiddenError } from "../utils/errors";
 import { getConectaApiUrl } from "../utils/conectaApi";
@@ -7,11 +6,21 @@ import { deobfuscateId } from "../utils/obfuscateId";
 
 
 export function extractToken(request: HttpRequest): string {
+    //primero tenta ler o header authorization
     const authHeader = request.headers.get("authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-        throw new UnauthorizedError("Header Authorization ausente ou inválido");
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+        return authHeader.substring(7);
     }
-    return authHeader.substring(7);
+    
+    //faz fallback e le a cookie
+    const cookieHeader = request.headers.get("cookie");
+    if(cookieHeader){
+        const match = cookieHeader?.split(";").map(c=> c.trim()).find(c=>c.startsWith("auth_token="));
+        if(match){
+            return match.split("=")[1] ?? "";
+        }
+    }
+    throw new UnauthorizedError("Token ausente ou invalido");
 }
 
 export async function verificarUsuario(

@@ -12,8 +12,22 @@ export async function getMongoDb(): Promise<Db>{
         client = new MongoClient(url);
         await client.connect();
         db= client.db("acucar_doce");
+        await ensureTimeSeriesCollection(db);
     }
     return db;
+}
+
+async function ensureTimeSeriesCollection(database: Db): Promise<void>{
+    const collections = await database.listCollections({name: "leituras"}).toArray();
+    if(collections.length === 0){
+        await database.createCollection("leituras",{
+            timeseries:{
+                timeField: "timestamp",
+                metaField: "metadata",
+                granularity: "seconds",
+            },
+        });
+    }
 }
 
 export async function closeMongoConnection():Promise<void>{

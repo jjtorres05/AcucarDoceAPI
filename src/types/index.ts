@@ -102,7 +102,6 @@ export interface LeituraResponse {
     dispositivo_id: string;     //id ofuscado na hora de mostrar
     sensor_id: string;          //mesma coisa que o ID de encima
     valor: number;              //numero da leitura do sensor
-    unidade: string;            
     created_at: Date;
 }
 

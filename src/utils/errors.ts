@@ -22,8 +22,8 @@ export class ForbiddenError extends AppError{
 }
 
 export class ValidationError extends AppError {
-    constructor(message = "Conflict"){
-        super(409, message);
+    constructor(message = "Dados invalidos"){
+        super(400, message);
         this.name= "ValidationError";
     }
 }

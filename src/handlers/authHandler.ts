@@ -1,5 +1,7 @@
 import { HttpRequest, HttpResponseInit } from "@azure/functions";
 import { getConectaApiUrl } from "../utils/conectaApi";
+import { setTokenCookie } from "../utils/tokenCookies";
+import { extractToken } from "../middleware/authGuard";
 
 export const authHandler = {
     login: async (request: HttpRequest):
@@ -13,6 +15,13 @@ export const authHandler = {
             body: body,
         });
         const data = await response.json();
+        if(response.ok && data.token){
+            return{
+                status: response.status,
+                jsonBody: data,
+                cookies: [setTokenCookie(data.token)],
+            };
+        }
         return {
             status: response.status,
             jsonBody: data,
@@ -21,17 +30,14 @@ export const authHandler = {
 
     registro: async (request: HttpRequest):
     Promise<HttpResponseInit> => {
+        const token= extractToken(request);
         const body = await request.json();
-        const authHeader = request.headers.get("authorization");
-        const headers: Record<string, string> = {
-            "Content-Type": "application/json",
-        };
-        if (authHeader) {
-            headers["Authorization"] = authHeader;
-        }
-        const response = await fetch(`${getConectaApiUrl()}/usuarios`, {
+        const response= await fetch(`${getConectaApiUrl()}/usuarios`,{
             method: "POST",
-            headers,
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
+            },
             body: JSON.stringify(body),
         });
         const data = await response.json();
@@ -43,17 +49,11 @@ export const authHandler = {
 
     listarEmpresas: async (request: HttpRequest):
     Promise<HttpResponseInit> => {
-        const authHeader = request.headers.get("authorization");
-        if (!authHeader) {
-            return {
-                status: 401,
-                jsonBody: { success: false, error: "header authorization ausente" },
-            };
-        }
+        const token = await extractToken(request)
         const response = await fetch(`${getConectaApiUrl()}/empresas`, {
             method: "GET",
             headers: {
-                "Authorization": authHeader,
+                "Authorization": `Bearer ${token}`,
             },
         });
         const data = await response.json();
