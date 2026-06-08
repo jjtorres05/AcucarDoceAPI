@@ -12,20 +12,20 @@ export const leituraRepository= {
         sensor_id: number;
         empresa_id: number;
         valor: number;
+        timestamp: Date;
     })=> {
         const db = await getMongoDb();
-        const agora = new Date();
         const duplicada= await db.collection(COLLECTION).findOne({
             "metadata.sensor_id": data.sensor_id,
             "metadata.empresa_id": data.empresa_id,
             valor: data.valor,
-            timestamp: agora,
+            timestamp: data.timestamp,
         });
         if(duplicada){
             throw new ConflictError("Leitura duplicada");
         }
         const documento = {
-            timestamp: agora,
+            timestamp: data.timestamp,
             metadata: {
                 dispositivo_id: data.dispositivo_id,
                 sensor_id: data.sensor_id,

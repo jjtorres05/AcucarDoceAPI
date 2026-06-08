@@ -48,6 +48,7 @@ export const leituraService={
             sensor_id: sensorId,
             empresa_id: device.empresa_id,
             valor: input.valor,
+            timestamp: new Date(input.timestamp),
         });
         return toResponse(leitura);
     },

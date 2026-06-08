@@ -5,16 +5,20 @@ import { criarLeituraSchema } from "../schemas/leituraSchema";
 import { leituraService } from "../services/leituraService";
 import { handleError,ok, created } from "../utils/httpResponse";
 import { deobfuscateId } from "../utils/obfuscateId";
+import { ValidationError } from "../utils/errors";
 
-function extrairFiltroData(request: HttpRequest): FiltroData | undefined {
+function extrairFiltroData(request: HttpRequest): FiltroData {
     const inicio = request.query.get("inicio");
     const fim = request.query.get("fim");
-    if(!inicio && !fim) return undefined;
-
-    return {
-        inicio: inicio ? new Date(inicio) : undefined,
-        fim: fim ? new Date(fim) : undefined,
-    };
+    if(!inicio || !fim){
+        throw new ValidationError("Parametros inicio e fim sao obrigatorios para listar leituras");
+    }
+    const inicioDate = new Date(inicio);
+    const fimDate = new Date(fim);
+    if(isNaN(inicioDate.getTime()) || isNaN(fimDate.getTime())){
+        throw new ValidationError("inicio e fim devem ser datas validas em formato ISO 8601");
+    }
+    return { inicio: inicioDate, fim: fimDate };
 }
 
 export const leituraHandler= {
@@ -37,14 +41,18 @@ export const leituraHandler= {
     listar: async (request: HttpRequest, auth: AuthContext ):
     Promise <HttpResponseInit> => {
         const id = request.query.get("id");
-        const dispositivoId = request.query.get("dispositivoId");
-        const sensorId = request.query.get("sensorId");
-        const filtro = extrairFiltroData(request);
 
+        // Buscar por ID nao precisa de filtro de data
         if(id){
             const result = await leituraService.obterPorId(auth,id);
             return ok(result);
         }
+
+        // Para listados, inicio e fim sao obrigatorios
+        const filtro = extrairFiltroData(request);
+        const dispositivoId = request.query.get("dispositivoId");
+        const sensorId = request.query.get("sensorId");
+
         if(sensorId){
             const result = await leituraService.listarPorSensor(auth, sensorId, filtro);
             return ok(result);

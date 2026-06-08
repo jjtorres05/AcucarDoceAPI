@@ -23,7 +23,7 @@ async function leituraCrud(request: HttpRequest, context: InvocationContext): Pr
             checkPermission(usuario, "listar");
             return await leituraHandler.listar(request, auth);
         }
-
+        
         return { status: 405, jsonBody: { success: false, error: "Método não permitido" } };
     } catch (erro) {
         context.error(`[leituras] Erro:`, erro);
